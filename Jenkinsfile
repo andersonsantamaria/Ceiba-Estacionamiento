@@ -67,10 +67,10 @@ pipeline {
 			steps{
 				echo '------------>Análisis de código estático<------------'
 				withSonarQubeEnv('Sonar') {
-					sh "${tool name: 'SonarScanner',
-					type:'hudson.plugins.sonar.SonarRunnerInstallation'}/bin/sonar-scanner
-					-Dproject.settings=sonar-project.properties"
-					Prácticas Técnicas (Gerencia Técnica)
+					sh "${
+						tool name: 'SonarScanner' ,
+						type:'hudson.plugins.sonar.SonarRunnerInstallation'
+					}/bin/sonar-scanner"
 				}
 			}
 		}
@@ -78,6 +78,7 @@ pipeline {
 		stage('Build') {
 			steps {
 				echo "------------>Build<------------"
+				sh 'gradle --b ./build.gradle build -x test'
 			}
 		}
 	}
@@ -88,9 +89,15 @@ pipeline {
 		}
 		success {
 			echo 'This will run only if successful'
+			junit '**/build/test-results/test/*.xml'
 		}
 		failure {
 			echo 'This will run only if failed'
+			(
+				to: 'anderson.santamaria@ceiba.com.co',
+				subject: "Failed Pipeline:${currentBuild.fullDisplayName}",
+				body: "Something is wrong with ${env.BUILD_URL}"
+			)
 		}
 		unstable {
 			echo 'This will run only if the run was marked as unstable'
