@@ -44,6 +44,3 @@ destinationFile = file("jacoco/jacocoTest.exec")
 }
 reports.junitXml.destination =  file("jacoco/test-results")
 }
-
-jacocoTestReport.dependsOn(test)
-jar.dependsOn(jacocoTestReport)
