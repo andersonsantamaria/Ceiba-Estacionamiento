@@ -54,7 +54,7 @@ public class VigilanteService implements RepositorioVigilante{
 		}
 	}
 	
-	private boolean laPlacaIniciaPorA(String placa){
+	protected boolean laPlacaIniciaPorA(String placa){
 		return placa.toUpperCase().startsWith("A");
 	}
 	

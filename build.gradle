@@ -32,4 +32,5 @@ dependencies {
 	compile group: 'com.googlecode.json-simple', name: 'json-simple', version:'1.1.1'
 	runtime('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testImplementation 'junit:junit:4.12'
 }
