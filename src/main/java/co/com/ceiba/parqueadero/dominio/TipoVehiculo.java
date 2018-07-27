@@ -10,7 +10,7 @@ public enum TipoVehiculo {
             case MOTO:
                 return 2;
             default:
-                throw new AssertionError("Tipo de Vehículo desconocido " + this);
+                throw new AssertionError("Tipo de Vehiculo desconocido " + this);
         }
     }
 }

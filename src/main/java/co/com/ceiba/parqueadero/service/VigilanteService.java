@@ -130,7 +130,7 @@ public class VigilanteService implements RepositorioVigilante{
 			this.registroVehiculoService.save(registroDeSalida);
 			return new RestResponse(HttpStatus.OK.value(), "Se ha completado la salida de forma correcta");
 		}
-		else return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "El vehículo no está activo, o no ha ingresado.");
+		else return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "El vehiculo no esta activo, o no ha ingresado.");
 	}
 	
 	@Override
@@ -143,7 +143,7 @@ public class VigilanteService implements RepositorioVigilante{
 				return new RestResponse(HttpStatus.OK.value(), "Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
 			}
 			else{
-				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No está autorizado a entrar");
+				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No esta autorizado a entrar");
 			}
 		}
 		else{
@@ -152,8 +152,7 @@ public class VigilanteService implements RepositorioVigilante{
 	}
 
 	@Override
-	public RestResponse permitirSalida(JSONObject vehiculoJson) {
-		
+	public RestResponse permitirSalida(JSONObject vehiculoJson) {	
 		Vehiculo vehiculo = this.createVehiculoFromJson(vehiculoJson);
 		Date fechaSalida = new Date();
 		return reportarSalida(fechaSalida, vehiculo);

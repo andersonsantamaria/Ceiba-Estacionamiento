@@ -10,7 +10,7 @@ public enum TipoRegistroVehiculo {
             case SALIDA:
                 return 2;
             default:
-                throw new AssertionError("Tipo de Autorización desconocida " + this);
+                throw new AssertionError("Tipo de Autorizacion desconocida " + this);
         }
     }
 }

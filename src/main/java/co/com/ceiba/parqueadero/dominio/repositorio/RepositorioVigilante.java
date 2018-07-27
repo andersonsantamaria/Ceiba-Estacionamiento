@@ -23,7 +23,7 @@ public interface RepositorioVigilante {
 	RestResponse permitirSalida(JSONObject vehiculoJson);
 	
 	/**
-	 * Permite obtener un listdo de los vehiculos que estén en el parqueadero
+	 * Permite obtener un listado de los vehiculos que esten en el parqueadero
 	 * @param fecha
 	 * @return
 	 */
