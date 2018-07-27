@@ -40,7 +40,7 @@ dependencies {
 test {
 jacoco {
 append = false
-destinationFile = file("build/jacoco/jacocoTest.exec")
+destinationFile = file("build/jacoco/test.exec")
 }
 reports.junitXml.destination =  file("build/jacoco/test-results")
 }
