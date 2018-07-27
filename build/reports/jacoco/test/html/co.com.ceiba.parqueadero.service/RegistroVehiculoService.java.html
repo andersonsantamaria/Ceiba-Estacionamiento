@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistroVehiculoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CeibaEstacionamiento</a> &gt; <a href="index.source.html" class="el_package">co.com.ceiba.parqueadero.service</a> &gt; <span class="el_source">RegistroVehiculoService.java</span></div><h1>RegistroVehiculoService.java</h1><pre class="source lang-java linenums">package co.com.ceiba.parqueadero.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.Carro;
+import co.com.ceiba.parqueadero.dominio.Moto;
+import co.com.ceiba.parqueadero.dominio.TipoRegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
+import co.com.ceiba.parqueadero.dominio.Vehiculo;
+import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioRegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioVehiculo;
+import co.com.ceiba.parqueadero.persistencia.entidad.RegistroVehiculoEntity;
+import co.com.ceiba.parqueadero.persistencia.entidad.TipoVehiculoEntity;
+
+import co.com.ceiba.parqueadero.persistencia.entidad.VehiculoEntity;
+import co.com.ceiba.parqueadero.persistencia.repositorio.jpa.RepositorioRegistroVehiculoJPA;
+import co.com.ceiba.parqueadero.persistencia.repositorio.jpa.RepositorioTipoDeVehiculoJPA;
+import co.com.ceiba.parqueadero.persistencia.repositorio.jpa.RepositorioVehiculoJPA;
+
+@Service
+<span class="nc" id="L26">public class RegistroVehiculoService implements RepositorioRegistroVehiculo {</span>
+	@Autowired
+	private RepositorioRegistroVehiculoJPA repositorioRegistroVehiculoJPA;
+	@Autowired
+	private RepositorioTipoDeVehiculoJPA repositorioTipoDeVehiculoJPA;
+	@Autowired
+	private RepositorioVehiculoJPA repositorioVehiculoJPA;
+
+	@Override
+	public void save(RegistroVehiculo registroVehiculo) {
+<span class="nc" id="L36">		RegistroVehiculoEntity registroVehiculoEntity = new RegistroVehiculoEntity();</span>
+<span class="nc" id="L37">		VehiculoEntity vehiculoEntity = new VehiculoEntity();</span>
+<span class="nc" id="L38">		TipoVehiculoEntity tiposDeVehiculoEntity = this.repositorioTipoDeVehiculoJPA</span>
+<span class="nc" id="L39">				.findById(registroVehiculo.getVehiculo().getTipo());</span>
+
+<span class="nc" id="L41">		vehiculoEntity.setPlaca(registroVehiculo.getVehiculo().getPlaca());</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">		if (registroVehiculo.getVehiculo() instanceof Moto) {</span>
+<span class="nc" id="L43">			vehiculoEntity.setCilindraje(((Moto) registroVehiculo.getVehiculo()).getCilindraje());</span>
+		}
+
+<span class="nc" id="L46">		vehiculoEntity.setTipoVehiculo(tiposDeVehiculoEntity);</span>
+<span class="nc" id="L47">		registroVehiculoEntity.setId(registroVehiculo.getId());</span>
+<span class="nc" id="L48">		registroVehiculoEntity.setFechaEntrada(registroVehiculo.getFechaEntrada());</span>
+<span class="nc" id="L49">		registroVehiculoEntity.setFechaSalida(registroVehiculo.getFechaSalida());</span>
+<span class="nc" id="L50">		registroVehiculoEntity.setVehiculo(vehiculoEntity.getPlaca());</span>
+<span class="nc" id="L51">		registroVehiculoEntity.setValorPagado(registroVehiculo.getValor());</span>
+<span class="nc" id="L52">		this.repositorioRegistroVehiculoJPA.save(registroVehiculoEntity);</span>
+<span class="nc" id="L53">	}</span>
+
+	@Override
+	public List&lt;Vehiculo&gt; obtenerVehiculosActivos() {
+<span class="nc" id="L57">		List&lt;VehiculoEntity&gt; listEntity = this.repositorioRegistroVehiculoJPA.obtenerVehiculosActivos();</span>
+<span class="nc" id="L58">		ArrayList&lt;Vehiculo&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L59">		Vehiculo vehiculo = null;</span>
+
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		for (VehiculoEntity vehiculoEntity : listEntity) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			if (vehiculoEntity.getTipoVehiculo().getId() == TipoVehiculo.MOTO.getTipo()) {</span>
+<span class="nc" id="L63">				vehiculo = new Moto(vehiculoEntity.getPlaca(), vehiculoEntity.getCilindraje());</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">			} else if (vehiculoEntity.getTipoVehiculo().getId() == TipoVehiculo.CARRO.getTipo()) {</span>
+<span class="nc" id="L65">				vehiculo = new Carro(vehiculoEntity.getPlaca());</span>
+			}
+
+<span class="nc" id="L68">			list.add(vehiculo);</span>
+<span class="nc" id="L69">		}</span>
+<span class="nc" id="L70">		return list;</span>
+	}
+
+	@Override
+	public RegistroVehiculo findByVehiculo(String placa) {
+<span class="nc" id="L75">		RegistroVehiculoEntity registroVehiculoEntity = this.repositorioRegistroVehiculoJPA.obtenerVehiculoActivo(placa);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if(registroVehiculoEntity != null) {</span>
+<span class="nc" id="L77">			VehiculoEntity vehiculoEntity = this.repositorioVehiculoJPA.findByPlaca(placa);</span>
+<span class="nc" id="L78">			Vehiculo vehiculo = null;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">			if (vehiculoEntity.getTipoVehiculo().getId() == TipoVehiculo.MOTO.getTipo()) {</span>
+<span class="nc" id="L80">				vehiculo = new Moto(vehiculoEntity.getPlaca(), vehiculoEntity.getCilindraje());</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			} else if (vehiculoEntity.getTipoVehiculo().getId() == TipoVehiculo.CARRO.getTipo()) {</span>
+<span class="nc" id="L82">				vehiculo = new Carro(vehiculoEntity.getPlaca());</span>
+			}
+	
+<span class="nc" id="L85">			return new RegistroVehiculo(registroVehiculoEntity.getId(), registroVehiculoEntity.getFechaEntrada(),</span>
+<span class="nc" id="L86">					registroVehiculoEntity.getFechaSalida(), vehiculo);</span>
+		}
+<span class="nc" id="L88">		else return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

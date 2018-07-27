@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VehiculoEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CeibaEstacionamiento</a> &gt; <a href="index.source.html" class="el_package">co.com.ceiba.parqueadero.persistencia.entidad</a> &gt; <span class="el_source">VehiculoEntity.java</span></div><h1>VehiculoEntity.java</h1><pre class="source lang-java linenums">package co.com.ceiba.parqueadero.persistencia.entidad;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+@Entity(name = &quot;vehiculo&quot;)
+public class VehiculoEntity {
+	
+	@Id
+	@Column(name =&quot;placa&quot;, nullable= false, unique= true , length= 7)
+	private String placa;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = &quot;tipovehiculo_id&quot; ,nullable = false)
+	private TipoVehiculoEntity tipoVehiculo;
+	
+	@Column(name = &quot;cilindraje&quot; , nullable= true)
+	private int cilindraje;
+	
+<span class="nc" id="L24">	public VehiculoEntity() {}</span>
+
+	public String getPlaca() {
+<span class="nc" id="L27">		return placa;</span>
+	}
+
+	public void setPlaca(String placa) {
+<span class="nc" id="L31">		this.placa = placa;</span>
+<span class="nc" id="L32">	}</span>
+
+	public TipoVehiculoEntity getTipoVehiculo() {
+<span class="nc" id="L35">		return tipoVehiculo;</span>
+	}
+
+	public void setTipoVehiculo(TipoVehiculoEntity tipoVehiculo) {
+<span class="nc" id="L39">		this.tipoVehiculo = tipoVehiculo;</span>
+<span class="nc" id="L40">	}</span>
+
+	public int getCilindraje() {
+<span class="nc" id="L43">		return cilindraje;</span>
+	}
+
+	public void setCilindraje(int cilindraje) {
+<span class="nc" id="L47">		this.cilindraje = cilindraje;</span>
+<span class="nc" id="L48">	}</span>
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VigilanteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CeibaEstacionamiento</a> &gt; <a href="index.source.html" class="el_package">co.com.ceiba.parqueadero.service</a> &gt; <span class="el_source">VigilanteService.java</span></div><h1>VigilanteService.java</h1><pre class="source lang-java linenums">package co.com.ceiba.parqueadero.service;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import co.com.ceiba.parqueadero.util.RestResponse;
+import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.Carro;
+import co.com.ceiba.parqueadero.dominio.Moto;
+import co.com.ceiba.parqueadero.dominio.Parqueadero;
+import co.com.ceiba.parqueadero.dominio.Precio;
+import co.com.ceiba.parqueadero.dominio.TipoRegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.TipoTiempo;
+import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
+import co.com.ceiba.parqueadero.dominio.Vehiculo;
+import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioVigilante;
+import co.com.ceiba.parqueadero.persistencia.entidad.RegistroVehiculoEntity;
+
+@Service
+public class VigilanteService implements RepositorioVigilante{
+	private static final int DIA_EN_MILISEGUNDOS = 86400000;
+	private static final int HORA_EN_MILISEGUNDOS = 3600000;
+	
+	private Parqueadero parqueadero;
+	@Autowired
+	private VehiculoService vehiculoService;
+	@Autowired
+	private RegistroVehiculoService registroVehiculoService;
+	@Autowired
+	private PrecioService precioService;
+	
+<span class="fc" id="L41">	public VigilanteService() {</span>
+<span class="fc" id="L42">		this.parqueadero = new Parqueadero();</span>
+<span class="fc" id="L43">	}</span>
+	
+	private boolean hayDisponibilidadParaVehiculo(Vehiculo vehiculo) {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		if (vehiculo instanceof Carro) {</span>
+<span class="nc" id="L47">			return parqueadero.hayDisponibilidadParaCarro();</span>
+		}
+<span class="nc bnc" id="L49" title="All 2 branches missed.">		else if (vehiculo instanceof Moto) {</span>
+<span class="nc" id="L50">			return parqueadero.hayDisponibilidadParaMoto();</span>
+		}
+		else{
+<span class="nc" id="L53">			return false;</span>
+		}
+	}
+	
+	protected boolean laPlacaIniciaPorA(String placa){
+<span class="fc" id="L58">		return placa.toUpperCase().startsWith(&quot;A&quot;);</span>
+	}
+	
+	private boolean puedeIngresarPorPlaca(String placa) {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		if(laPlacaIniciaPorA(placa)){</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">			if(esDiaHabil()){</span>
+<span class="nc" id="L64">				return true;</span>
+			}
+			else{
+<span class="nc" id="L67">				return false;</span>
+			}
+		}
+		else{
+<span class="nc" id="L71">			return true;</span>
+		}
+	}
+
+	private boolean esDiaHabil() {
+<span class="nc" id="L76">		LocalDate fechaActual = LocalDate.now();</span>
+<span class="nc" id="L77">		int dayOfWeek = fechaActual.getDayOfWeek().getValue();</span>
+<span class="nc bnc" id="L78" title="All 4 branches missed.">		return (dayOfWeek == 1 || dayOfWeek == 7);</span>
+	}
+
+	private int obtenerValorAPagar(Vehiculo vehiculo, long fechaEntrada, long fechaSalida) {
+		
+<span class="nc" id="L83">		Precio precioPorHora = this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(), TipoTiempo.HORA.getTipo());</span>
+<span class="nc" id="L84">		Precio precioPorDia = this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(), TipoTiempo.DIA.getTipo());</span>
+		
+<span class="nc" id="L86">		int cantidadHoras = calcularTiempoEnElParqueadero(fechaEntrada, fechaSalida, HORA_EN_MILISEGUNDOS);</span>
+<span class="nc" id="L87">		int cantidadDias = calcularTiempoEnElParqueadero(fechaEntrada, fechaSalida, DIA_EN_MILISEGUNDOS);</span>
+		
+<span class="nc" id="L89">		cantidadHoras -= (cantidadDias * 24);</span>
+		
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		if (cantidadHoras &gt; 8) {</span>
+<span class="nc" id="L92">			cantidadHoras = 0;</span>
+<span class="nc" id="L93">			cantidadDias++;</span>
+		}
+
+<span class="nc" id="L96">		int valorPorHoras = (int) (cantidadHoras * precioPorHora.getValor());</span>
+<span class="nc" id="L97">		int valorPorDias = (int) (cantidadDias * precioPorDia.getValor());</span>
+<span class="nc" id="L98">		int costo = valorPorHoras + valorPorDias;</span>
+		
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		if (vehiculo instanceof Moto) {</span>
+<span class="nc" id="L101">			costo += costoExtraPorCilindraje(((Moto) vehiculo).getCilindraje());</span>
+		}
+		
+<span class="nc" id="L104">		return costo;</span>
+	}
+
+	private int costoExtraPorCilindraje(int cilindraje) {
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		return (cilindraje &gt; 500) ? parqueadero.COSTO_POR_CILINDRAJE : 0;</span>
+	}
+
+	private int calcularTiempoEnElParqueadero(long fechaEntrada, long fechaSalida, int tiempo){
+<span class="nc" id="L112">		long resta = fechaSalida - fechaEntrada;		</span>
+<span class="nc" id="L113">		return (int) resta / tiempo;</span>
+	}
+	
+	private void reportarIngreso(Vehiculo vehiculo){
+<span class="nc" id="L117">		Date fechaEntrada = new Date();</span>
+<span class="nc" id="L118">		RegistroVehiculo registroDeEntrada = new RegistroVehiculo(fechaEntrada, null,vehiculo);</span>
+<span class="nc" id="L119">		this.vehiculoService.save(vehiculo);</span>
+<span class="nc" id="L120">		this.registroVehiculoService.save(registroDeEntrada);</span>
+<span class="nc" id="L121">	}</span>
+	
+	private RestResponse reportarSalida(Date fechaSalida, Vehiculo vehiculo){
+<span class="nc" id="L124">		RegistroVehiculo registroDeSalida = this.registroVehiculoService.findByVehiculo(vehiculo.getPlaca());</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		if(registroDeSalida != null) {</span>
+<span class="nc" id="L126">			int costo = obtenerValorAPagar(vehiculo, registroDeSalida.getFechaEntrada().getTime(), fechaSalida.getTime());</span>
+<span class="nc" id="L127">			registroDeSalida.setVehiculo(vehiculo);</span>
+<span class="nc" id="L128">			registroDeSalida.setFechaSalida(fechaSalida);</span>
+<span class="nc" id="L129">			registroDeSalida.setValor(costo);</span>
+<span class="nc" id="L130">			this.registroVehiculoService.save(registroDeSalida);</span>
+<span class="nc" id="L131">			return new RestResponse(HttpStatus.OK.value(), &quot;Se ha completado la salida de forma correcta&quot;);</span>
+		}
+<span class="nc" id="L133">		else return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), &quot;El vehiculo no esta activo, o no ha ingresado.&quot;);</span>
+	}
+	
+	@Override
+	public RestResponse permitirIngreso(JSONObject vehiculoJson) {
+<span class="nc" id="L138">		Vehiculo vehiculo = this.createVehiculoFromJson(vehiculoJson);</span>
+				
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if(hayDisponibilidadParaVehiculo(vehiculo)){</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			if(puedeIngresarPorPlaca(vehiculo.getPlaca())){</span>
+<span class="nc" id="L142">				reportarIngreso(vehiculo);</span>
+<span class="nc" id="L143">				return new RestResponse(HttpStatus.OK.value(), &quot;Se ha registrado el ingreso del vehiculo con placa = &quot; + vehiculo.getPlaca());</span>
+			}
+			else{
+<span class="nc" id="L146">				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), &quot;No esta autorizado a entrar&quot;);</span>
+			}
+		}
+		else{
+<span class="nc" id="L150">			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), &quot;No hay disponibilidad&quot;);</span>
+		}
+	}
+
+	@Override
+	public RestResponse permitirSalida(JSONObject vehiculoJson) {	
+<span class="nc" id="L156">		Vehiculo vehiculo = this.createVehiculoFromJson(vehiculoJson);</span>
+<span class="nc" id="L157">		Date fechaSalida = new Date();</span>
+<span class="nc" id="L158">		return reportarSalida(fechaSalida, vehiculo);</span>
+	}
+	
+	@Override
+	public List&lt;Vehiculo&gt; obtenerVehiculosQueEstanEnElParqueadero() {
+<span class="nc" id="L163">		return this.registroVehiculoService.obtenerVehiculosActivos();</span>
+	}
+	
+	private Vehiculo createVehiculoFromJson(JSONObject vehiculoJson) {
+<span class="nc" id="L167">		Vehiculo vehiculo = null;</span>
+		
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if(Integer.parseInt(vehiculoJson.get(&quot;tipo&quot;).toString()) == TipoVehiculo.MOTO.getTipo()) {</span>
+<span class="nc" id="L170">			vehiculo = new Moto(vehiculoJson.get(&quot;placa&quot;).toString(), Short.parseShort(vehiculoJson.get(&quot;cilindraje&quot;).toString()));</span>
+		}
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		else if(Integer.parseInt(vehiculoJson.get(&quot;tipo&quot;).toString()) == TipoVehiculo.CARRO.getTipo()) {</span>
+<span class="nc" id="L173">			vehiculo = new Carro(vehiculoJson.get(&quot;placa&quot;).toString());</span>
+		}
+		
+<span class="nc" id="L176">		return vehiculo;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>
