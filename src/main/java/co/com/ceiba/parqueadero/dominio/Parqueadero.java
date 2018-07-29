@@ -6,6 +6,7 @@ public class Parqueadero {
 	private static final byte CAPACIDAD_DE_CARROS = 20;
 	private static final byte CAPACIDAD_DE_MOTOS = 10;
 	public static final short COSTO_POR_CILINDRAJE = 2000;
+	public static final short MAXIMO_CILINDRJE_PERMITIDO_SIN_COSTO = 500;
 	
 	private ArrayList<Carro> carros = new ArrayList<Carro>();
 	private ArrayList<Moto> motos = new ArrayList<Moto>();

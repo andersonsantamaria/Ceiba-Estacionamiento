@@ -1,5 +1,6 @@
 package co.com.ceiba.parqueadero.service;
 
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,9 +41,11 @@ public class VigilanteService implements RepositorioVigilante{
 	
 	private boolean hayDisponibilidadParaVehiculo(Vehiculo vehiculo) {
 		if (vehiculo instanceof Carro) {
+			this.saberCantidadDeVehiculosPorTipo(TipoVehiculo.CARRO.getTipo());
 			return parqueadero.hayDisponibilidadParaCarro();
 		}
 		else if (vehiculo instanceof Moto) {
+			this.saberCantidadDeVehiculosPorTipo(TipoVehiculo.MOTO.getTipo());
 			return parqueadero.hayDisponibilidadParaMoto();
 		}
 		else{
@@ -50,18 +53,28 @@ public class VigilanteService implements RepositorioVigilante{
 		}
 	}
 	
-	protected boolean laPlacaIniciaPorA(String placa){
+	private void saberCantidadDeVehiculosPorTipo(int tipoVehiculo) {
+		ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
+		
+		for (Vehiculo vehiculoActivo : vehiculosActivos) {
+			if(vehiculoActivo.getTipo() == tipoVehiculo) {
+				if(tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
+					parqueadero.getCarros().add((Carro) vehiculoActivo);
+				}
+				else if(tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
+					parqueadero.getMotos().add((Moto) vehiculoActivo);
+				}
+			}
+		}		
+	}
+	
+ 	protected boolean laPlacaIniciaPorA(String placa){
 		return placa.toUpperCase().startsWith("A");
 	}
 	
 	private boolean puedeIngresarPorPlaca(String placa) {
 		if(laPlacaIniciaPorA(placa)){
-			if(esDiaHabil()){
-				return true;
-			}
-			else{
-				return false;
-			}
+			return esDiaHabil();
 		}
 		else{
 			return true;
@@ -79,7 +92,8 @@ public class VigilanteService implements RepositorioVigilante{
 		Precio precioPorHora = this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(), TipoTiempo.HORA.getTipo());
 		Precio precioPorDia = this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(), TipoTiempo.DIA.getTipo());
 		
-		int cantidadHoras = calcularTiempoEnElParqueadero(fechaEntrada, fechaSalida, HORA_EN_MILISEGUNDOS);
+		int cantidadHoras = 1;
+		cantidadHoras += calcularTiempoEnElParqueadero(fechaEntrada, fechaSalida, HORA_EN_MILISEGUNDOS);
 		int cantidadDias = calcularTiempoEnElParqueadero(fechaEntrada, fechaSalida, DIA_EN_MILISEGUNDOS);
 		
 		cantidadHoras -= (cantidadDias * 24);
@@ -101,7 +115,7 @@ public class VigilanteService implements RepositorioVigilante{
 	}
 
 	private int costoExtraPorCilindraje(int cilindraje) {
-		return (cilindraje > 500) ? Parqueadero.COSTO_POR_CILINDRAJE : 0;
+		return (cilindraje > Parqueadero.MAXIMO_CILINDRJE_PERMITIDO_SIN_COSTO) ? Parqueadero.COSTO_POR_CILINDRAJE : 0;
 	}
 
 	private int calcularTiempoEnElParqueadero(long fechaEntrada, long fechaSalida, int tiempo){
@@ -124,40 +138,54 @@ public class VigilanteService implements RepositorioVigilante{
 			registroDeSalida.setFechaSalida(fechaSalida);
 			registroDeSalida.setValor(costo);
 			this.registroVehiculoService.save(registroDeSalida);
-			return new RestResponse(HttpStatus.OK.value(), "Se ha completado la salida de forma correcta");
+			return new RestResponse(HttpStatus.OK.value(), "El valor a pagar por la estadia en el parqueadero para el vehiculo con placa " + vehiculo.getPlaca() + " es : $" + costo + " fecha de ingreso : " + registroDeSalida.getFechaEntrada());
 		}
 		else return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "El vehiculo no esta activo, o no ha ingresado.");
 	}
 	
 	@Override
 	public RestResponse permitirIngreso(JSONObject vehiculoJson) {
-		Vehiculo vehiculo = this.createVehiculoFromJson(vehiculoJson);
-		
-		
-		if(!comprobarSiEsta(vehiculo)) {
-			if(hayDisponibilidadParaVehiculo(vehiculo)){
-				if(puedeIngresarPorPlaca(vehiculo.getPlaca())){
-					reportarIngreso(vehiculo);
-					return new RestResponse(HttpStatus.OK.value(), "Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
+		Vehiculo vehiculo;
+		try {
+			vehiculo = this.createVehiculoFromJson(vehiculoJson);
+			
+			if(!comprobarSiEsta(vehiculo)) {
+				if(hayDisponibilidadParaVehiculo(vehiculo)){
+					if(puedeIngresarPorPlaca(vehiculo.getPlaca())){
+						reportarIngreso(vehiculo);
+						return new RestResponse(HttpStatus.OK.value(), "Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
+					}
+					else{
+						return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No puede ingresar porque no esta en un dia habil.");
+					}
 				}
 				else{
-					return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No esta autorizado a entrar.");
+					return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No hay disponibilidad.");
 				}
 			}
 			else{
-				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No hay disponibilidad.");
+				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Este vehículo se encuentra actualmente en el parquedero.");
 			}
+		} catch (NumberFormatException | ParseException e) {
+			e.printStackTrace();
 		}
-		else{
-			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Este vehículo se encuentra actualmente en el parquedero.");
-		}
+		return  new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Ocurrio un error con el ingreso de este vehiculo.");
 	}
 
 	@Override
 	public RestResponse permitirSalida(JSONObject vehiculoJson) {	
-		Vehiculo vehiculo = this.createVehiculoFromJson(vehiculoJson);
-		Date fechaSalida = new Date();
-		return reportarSalida(fechaSalida, vehiculo);
+		Vehiculo vehiculo;
+		try {
+			vehiculo = this.createVehiculoFromJson(vehiculoJson);
+			Date fechaSalida = new Date();
+			return reportarSalida(fechaSalida, vehiculo);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return  new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Ocurrio un error con la salida de este vehiculo.");
+		
 	}
 	
 	@Override
@@ -165,11 +193,11 @@ public class VigilanteService implements RepositorioVigilante{
 		return this.registroVehiculoService.obtenerVehiculosActivos();
 	}
 	
-	private Vehiculo createVehiculoFromJson(JSONObject vehiculoJson) {
+	private Vehiculo createVehiculoFromJson(JSONObject vehiculoJson) throws NumberFormatException, ParseException {
 		Vehiculo vehiculo = null;
 		
 		if(Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.MOTO.getTipo()) {
-			vehiculo = new Moto(vehiculoJson.get("placa").toString(), Short.parseShort(vehiculoJson.get("cilindraje").toString()));
+			vehiculo = new Moto(vehiculoJson.get("placa").toString(), Integer.parseInt(vehiculoJson.get("cilindraje").toString()));
 		}
 		else if(Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.CARRO.getTipo()) {
 			vehiculo = new Carro(vehiculoJson.get("placa").toString());
