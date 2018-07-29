@@ -2,9 +2,7 @@ package co.com.ceiba.parqueadero.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import org.json.simple.JSONObject;
@@ -12,18 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import co.com.ceiba.parqueadero.util.RestResponse;
-import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
 import co.com.ceiba.parqueadero.dominio.Carro;
 import co.com.ceiba.parqueadero.dominio.Moto;
 import co.com.ceiba.parqueadero.dominio.Parqueadero;
 import co.com.ceiba.parqueadero.dominio.Precio;
-import co.com.ceiba.parqueadero.dominio.TipoRegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
 import co.com.ceiba.parqueadero.dominio.TipoTiempo;
 import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
 import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioVigilante;
-import co.com.ceiba.parqueadero.persistencia.entidad.RegistroVehiculoEntity;
+import co.com.ceiba.parqueadero.util.RestResponse;
 
 @Service
 public class VigilanteService implements RepositorioVigilante{
@@ -105,7 +101,7 @@ public class VigilanteService implements RepositorioVigilante{
 	}
 
 	private int costoExtraPorCilindraje(int cilindraje) {
-		return (cilindraje > 500) ? parqueadero.COSTO_POR_CILINDRAJE : 0;
+		return (cilindraje > 500) ? Parqueadero.COSTO_POR_CILINDRAJE : 0;
 	}
 
 	private int calcularTiempoEnElParqueadero(long fechaEntrada, long fechaSalida, int tiempo){
@@ -136,18 +132,24 @@ public class VigilanteService implements RepositorioVigilante{
 	@Override
 	public RestResponse permitirIngreso(JSONObject vehiculoJson) {
 		Vehiculo vehiculo = this.createVehiculoFromJson(vehiculoJson);
-				
-		if(hayDisponibilidadParaVehiculo(vehiculo)){
-			if(puedeIngresarPorPlaca(vehiculo.getPlaca())){
-				reportarIngreso(vehiculo);
-				return new RestResponse(HttpStatus.OK.value(), "Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
+		
+		
+		if(!comprobarSiEsta(vehiculo)) {
+			if(hayDisponibilidadParaVehiculo(vehiculo)){
+				if(puedeIngresarPorPlaca(vehiculo.getPlaca())){
+					reportarIngreso(vehiculo);
+					return new RestResponse(HttpStatus.OK.value(), "Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
+				}
+				else{
+					return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No esta autorizado a entrar.");
+				}
 			}
 			else{
-				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No esta autorizado a entrar");
+				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No hay disponibilidad.");
 			}
 		}
 		else{
-			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No hay disponibilidad");
+			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Este vehículo se encuentra actualmente en el parquedero.");
 		}
 	}
 
@@ -174,5 +176,16 @@ public class VigilanteService implements RepositorioVigilante{
 		}
 		
 		return vehiculo;
+	}
+	
+	private boolean comprobarSiEsta(Vehiculo vehiculo) {
+		ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
+		
+		for (Vehiculo vehiculoActivo : vehiculosActivos) {
+			if(vehiculoActivo.getPlaca().equals(vehiculo.getPlaca())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

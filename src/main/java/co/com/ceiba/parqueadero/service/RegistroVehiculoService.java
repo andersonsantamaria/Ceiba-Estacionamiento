@@ -6,17 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
 import co.com.ceiba.parqueadero.dominio.Carro;
 import co.com.ceiba.parqueadero.dominio.Moto;
-import co.com.ceiba.parqueadero.dominio.TipoRegistroVehiculo;
+import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
 import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
 import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioRegistroVehiculo;
-import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioVehiculo;
 import co.com.ceiba.parqueadero.persistencia.entidad.RegistroVehiculoEntity;
 import co.com.ceiba.parqueadero.persistencia.entidad.TipoVehiculoEntity;
-
 import co.com.ceiba.parqueadero.persistencia.entidad.VehiculoEntity;
 import co.com.ceiba.parqueadero.persistencia.repositorio.jpa.RepositorioRegistroVehiculoJPA;
 import co.com.ceiba.parqueadero.persistencia.repositorio.jpa.RepositorioTipoDeVehiculoJPA;
