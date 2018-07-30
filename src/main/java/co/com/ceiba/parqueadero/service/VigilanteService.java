@@ -78,7 +78,6 @@ public class VigilanteService implements RepositorioVigilante {
 				}
 			}
 		}catch(NullPointerException e){
-			System.out.println("No hay vehículos en el parqueadero");
 		}
 
 		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {

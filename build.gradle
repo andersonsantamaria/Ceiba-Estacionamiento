@@ -37,6 +37,7 @@ dependencies {
 	testCompile 'org.mockito:mockito-all:1.10.19'
 	compile files('libs/trm.jar')
 	compile fileTree(dir: 'libs', include: '*.jar')
+	testCompile group: 'com.h2database', name: 'h2', version: '1.4.197'
 }
 
 task listJars << {

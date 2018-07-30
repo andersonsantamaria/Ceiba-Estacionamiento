@@ -3,8 +3,6 @@ package co.com.ceiba.parqueadero.testdatabuilder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONObject;
-
 import co.com.ceiba.parqueadero.dominio.Carro;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
 
