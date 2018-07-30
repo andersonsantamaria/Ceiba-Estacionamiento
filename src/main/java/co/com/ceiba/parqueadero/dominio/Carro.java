@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Carro extends Vehiculo{
 
-	public Carro(String placa, Date fechaEntrada) {
+	public Carro(String placa, String fechaEntrada) {
 		super(placa, TipoVehiculo.CARRO.getTipo(), fechaEntrada);
 	}
 	

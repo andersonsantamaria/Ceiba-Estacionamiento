@@ -35,5 +35,11 @@ public class VigilanteController {
 	@RequestMapping(value = "/vehiculosActivos", method = RequestMethod.GET)
 	public List<Vehiculo> consultarVehiculosQueEstanEnElParqueadero() {
 		return repositorioVigilante.obtenerVehiculosQueEstanEnElParqueadero();
-	}	
+	}
+	
+	@CrossOrigin(origins = "http://localhost:4200")
+	@RequestMapping(value = "/obtenerTRM", method = RequestMethod.GET)
+	public RestResponse obtenerTRM() {
+		return repositorioVigilante.obtenerTRM();
+	}
 }

@@ -58,9 +58,9 @@ public class RegistroVehiculoService implements RepositorioRegistroVehiculo {
 		for (VehiculoEntity vehiculoEntity : listEntity) {
 			RegistroVehiculoEntity registroVehiculoEntity = this.repositorioRegistroVehiculoJPA.obtenerVehiculoActivo(vehiculoEntity.getPlaca());
 			if (vehiculoEntity.getTipoVehiculo().getId() == TipoVehiculo.MOTO.getTipo()) {
-				vehiculo = new Moto(vehiculoEntity.getPlaca(), vehiculoEntity.getCilindraje(),registroVehiculoEntity.getFechaEntrada());
+				vehiculo = new Moto(vehiculoEntity.getPlaca(), vehiculoEntity.getCilindraje(),registroVehiculoEntity.getFechaEntrada().toString());
 			} else if (vehiculoEntity.getTipoVehiculo().getId() == TipoVehiculo.CARRO.getTipo()) {
-				vehiculo = new Carro(vehiculoEntity.getPlaca(),registroVehiculoEntity.getFechaEntrada());
+				vehiculo = new Carro(vehiculoEntity.getPlaca(),registroVehiculoEntity.getFechaEntrada().toString());
 			}
 
 			list.add(vehiculo);

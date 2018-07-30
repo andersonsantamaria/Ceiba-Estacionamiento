@@ -5,7 +5,7 @@ import java.util.Date;
 public class Moto extends Vehiculo{
 	private int  cilindraje;
 
-	public Moto(String placa, int cilindraje, Date fechaEntrada) {
+	public Moto(String placa, int cilindraje, String fechaEntrada) {
 		super(placa, TipoVehiculo.MOTO.getTipo(), fechaEntrada);
 		this.cilindraje = cilindraje;
 	}

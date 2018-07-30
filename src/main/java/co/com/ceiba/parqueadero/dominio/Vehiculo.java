@@ -5,11 +5,11 @@ import java.util.Date;
 public class Vehiculo{
 	private String placa;
 	private int tipo;
-	private Date fechaEntrada;
+	private String fechaEntrada;
 
 	public Vehiculo() {}
 	
-	public Vehiculo(String placa, int tipo, Date fechaEntrada) {
+	public Vehiculo(String placa, int tipo, String fechaEntrada) {
 		this.placa = placa;
 		this.tipo = tipo;
 		this.fechaEntrada = fechaEntrada;
@@ -28,7 +28,7 @@ public class Vehiculo{
 		return tipo;
 	}
 	
-	public Date getFechaEntrada() {
+	public String getFechaEntrada() {
 		return fechaEntrada;
 	}
 	
