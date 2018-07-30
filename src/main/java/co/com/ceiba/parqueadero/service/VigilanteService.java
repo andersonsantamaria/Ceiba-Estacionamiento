@@ -30,7 +30,7 @@ import co.com.sc.nexura.superfinanciera.action.generic.services.trm.test.TCRMTes
 public class VigilanteService implements RepositorioVigilante {
 	private static final int DIA_EN_MILISEGUNDOS = 86400000;
 	private static final int HORA_EN_MILISEGUNDOS = 3600000;
-	private static final String _VALUE_QUERY_FORMAT = "#0.00";
+	private static final String VALUE_QUERY_FORMAT = "#0.00";
 
 	private Parqueadero parqueadero;
 	@Autowired
@@ -77,11 +77,9 @@ public class VigilanteService implements RepositorioVigilante {
 			}
 		}
 
-		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
-			if(carros != null)
+		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo() && carros != null) {
 				parqueadero.setCarros(carros);
-		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
-			if(motos != null)
+		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo() && motos != null) {
 				parqueadero.setMotos(motos);
 		}
 	}
@@ -169,8 +167,8 @@ public class VigilanteService implements RepositorioVigilante {
 
 	@Override
 	public RestResponse permitirIngreso(JSONObject vehiculoJson) {
-		Vehiculo vehiculo;
 		try {
+			Vehiculo vehiculo;
 			vehiculo = this.createVehiculoFromJson(vehiculoJson);
 
 			if (!comprobarSiEsta(vehiculo)) {
@@ -190,7 +188,7 @@ public class VigilanteService implements RepositorioVigilante {
 				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 						"Este vehiculo se encuentra actualmente en el parquedero.");
 			}
-		} catch (NumberFormatException | ParseException | NullPointerException e) {
+		} catch (NumberFormatException | NullPointerException e) {
 			e.printStackTrace();
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con el ingreso de este vehiculo." + e);
@@ -205,9 +203,7 @@ public class VigilanteService implements RepositorioVigilante {
 			vehiculo = this.createVehiculoFromJson(vehiculoJson);
 			Date fechaSalida = new Date();
 			return reportarSalida(fechaSalida, vehiculo);
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
+		} catch (NumberFormatException | NullPointerException e) {
 			e.printStackTrace();
 		}
 		return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Ocurrio un error con la salida de este vehiculo.");
@@ -219,7 +215,7 @@ public class VigilanteService implements RepositorioVigilante {
 		return this.registroVehiculoService.obtenerVehiculosActivos();
 	}
 
-	private Vehiculo createVehiculoFromJson(JSONObject vehiculoJson) throws NumberFormatException, ParseException {
+	private Vehiculo createVehiculoFromJson(JSONObject vehiculoJson){
 		Vehiculo vehiculo = null;
 
 		if (Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.MOTO.getTipo()) {
@@ -247,7 +243,7 @@ public class VigilanteService implements RepositorioVigilante {
 	}
 
 	public RestResponse obtenerTRM() {
-		DecimalFormat decimalFormat = new DecimalFormat(_VALUE_QUERY_FORMAT);
+		DecimalFormat decimalFormat = new DecimalFormat(VALUE_QUERY_FORMAT);
 		String response = "";
 
 		try {
