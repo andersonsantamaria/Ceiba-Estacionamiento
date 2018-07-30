@@ -30,7 +30,7 @@ public interface RepositorioVigilante {
 	List<Vehiculo> obtenerVehiculosQueEstanEnElParqueadero();
 	
 	/**
-	 * Permite obtener la TRM del día
+	 * Permite obtener la TRM del dia
 	 * @param
 	 * @return
 	 */

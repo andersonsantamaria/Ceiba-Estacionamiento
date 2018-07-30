@@ -188,7 +188,7 @@ public class VigilanteService implements RepositorioVigilante {
 				}
 			} else {
 				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
-						"Este vehículo se encuentra actualmente en el parquedero.");
+						"Este vehiculo se encuentra actualmente en el parquedero.");
 			}
 		} catch (NumberFormatException | ParseException | NullPointerException e) {
 			e.printStackTrace();
@@ -252,7 +252,7 @@ public class VigilanteService implements RepositorioVigilante {
 
 		try {
 			TcrmResponse tcrmResponse = TCRMTestClient.devolverTRMDelDia();
-			response = "TRM del día: $" + decimalFormat.format(tcrmResponse.getValue());
+			response = "TRM del dia: $" + decimalFormat.format(tcrmResponse.getValue());
 
 		} catch (RemoteException | ParseException e) {
 			e.printStackTrace();
