@@ -37,15 +37,15 @@ public class VigilanteControllerTest {
 		mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
 	}
 
-	@Test
-	public void obtenerTRM() throws Exception {
-		//arrange
-		RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/parqueadero/obtenerTRM")
-				.contentType(MediaType.APPLICATION_JSON);
-		// act
-		mockMvc.perform(requestBuilder).andDo(print())
-		.andExpect(status().isOk());
-	}
+//	@Test
+//	public void obtenerTRM() throws Exception {
+//		//arrange
+//		RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/parqueadero/obtenerTRM")
+//				.contentType(MediaType.APPLICATION_JSON);
+//		// act
+//		mockMvc.perform(requestBuilder).andDo(print())
+//		.andExpect(status().isOk());
+//	}
 
 	/*
 	 * @Test public void noHayDisponibilidadParaCarro() { // arrange
