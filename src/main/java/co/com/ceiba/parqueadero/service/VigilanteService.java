@@ -28,11 +28,12 @@ import co.com.sc.nexura.superfinanciera.action.generic.services.trm.test.TCRMTes
 
 @Service
 public class VigilanteService implements RepositorioVigilante {
-	private static final int DIA_EN_MILISEGUNDOS = 86400000;
-	private static final int HORA_EN_MILISEGUNDOS = 3600000;
-	private static final String VALUE_QUERY_FORMAT = "#0.00";
+	protected static final int DIA_EN_MILISEGUNDOS = 86400000;
+	protected static final int HORA_EN_MILISEGUNDOS = 3600000;
+	protected static final String VALUE_QUERY_FORMAT = "#0.00";
 
 	private Parqueadero parqueadero;
+
 	@Autowired
 	private VehiculoService vehiculoService;
 	@Autowired
@@ -42,10 +43,6 @@ public class VigilanteService implements RepositorioVigilante {
 
 	public VigilanteService() {
 		parqueadero = new Parqueadero();
-	}
-
-	public VigilanteService(Parqueadero parqueadero) {
-		this.parqueadero = parqueadero;
 	}
 
 	protected boolean hayDisponibilidadParaVehiculo(Vehiculo vehiculo) {
@@ -60,27 +57,34 @@ public class VigilanteService implements RepositorioVigilante {
 		}
 	}
 
-	public void inicializarCantidadDeVehiculosPorTipo(int tipoVehiculo) {
+	protected void inicializarCantidadDeVehiculosPorTipo(int tipoVehiculo) {
 		ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
 		ArrayList<Moto> motos = null;
 		ArrayList<Carro> carros = null;
-
-		for (Vehiculo vehiculoActivo : vehiculosActivos) {
-			if (vehiculoActivo.getTipo() == tipoVehiculo) {
-				if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
-					carros = new ArrayList<>();
-					carros.add((Carro) vehiculoActivo);
-				} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
-					motos = new ArrayList<>();
-					motos.add((Moto) vehiculoActivo);
+		
+		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
+			carros = new ArrayList<>();
+		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
+			motos = new ArrayList<>();
+		}
+		try {
+			for (Vehiculo vehiculoActivo : vehiculosActivos) {
+				if (vehiculoActivo.getTipo() == tipoVehiculo) {
+					if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
+						carros.add((Carro) vehiculoActivo);
+					} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
+						motos.add((Moto) vehiculoActivo);
+					}
 				}
 			}
+		}catch(NullPointerException e){
+			System.out.println("No hay vehículos en el parqueadero");
 		}
 
-		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo() && carros != null) {
-				parqueadero.setCarros(carros);
-		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo() && motos != null) {
-				parqueadero.setMotos(motos);
+		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
+			this.parqueadero.setCarros(carros);
+		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
+			this.parqueadero.setMotos(motos);
 		}
 	}
 
@@ -102,7 +106,7 @@ public class VigilanteService implements RepositorioVigilante {
 		return (dayOfWeek == 1 || dayOfWeek == 7);
 	}
 
-	private int obtenerValorAPagar(Vehiculo vehiculo, long fechaEntrada, long fechaSalida) {
+	protected int obtenerValorAPagar(Vehiculo vehiculo, long fechaEntrada, long fechaSalida) {
 
 		Precio precioPorHora = this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
 				TipoTiempo.HORA.getTipo());
@@ -131,11 +135,11 @@ public class VigilanteService implements RepositorioVigilante {
 		return costo;
 	}
 
-	private int costoExtraPorCilindraje(int cilindraje) {
+	protected int costoExtraPorCilindraje(int cilindraje) {
 		return (cilindraje > Parqueadero.MAXIMO_CILINDRJE_PERMITIDO_SIN_COSTO) ? Parqueadero.COSTO_POR_CILINDRAJE : 0;
 	}
 
-	private int calcularTiempoEnElParqueadero(long fechaEntrada, long fechaSalida, int tiempo) {
+	protected int calcularTiempoEnElParqueadero(long fechaEntrada, long fechaSalida, int tiempo) {
 		long resta = fechaSalida - fechaEntrada;
 		return (int) resta / tiempo;
 	}
@@ -215,7 +219,7 @@ public class VigilanteService implements RepositorioVigilante {
 		return this.registroVehiculoService.obtenerVehiculosActivos();
 	}
 
-	private Vehiculo createVehiculoFromJson(JSONObject vehiculoJson){
+	protected Vehiculo createVehiculoFromJson(JSONObject vehiculoJson){
 		Vehiculo vehiculo = null;
 
 		if (Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.MOTO.getTipo()) {
@@ -255,5 +259,8 @@ public class VigilanteService implements RepositorioVigilante {
 		}
 		return new RestResponse(HttpStatus.OK.value(), response);
 	}
-
+	
+	public Parqueadero getParqueadero() {
+		return parqueadero;
+	}
 }

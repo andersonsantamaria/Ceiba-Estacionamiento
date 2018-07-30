@@ -1,7 +1,5 @@
 package co.com.ceiba.parqueadero.dominio;
 
-import java.util.Date;
-
 public class Vehiculo{
 	private String placa;
 	private int tipo;

@@ -2,17 +2,48 @@ package co.com.ceiba.parqueadero.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import co.com.ceiba.parqueadero.dominio.Moto;
+import co.com.ceiba.parqueadero.dominio.Precio;
+import co.com.ceiba.parqueadero.dominio.TipoTiempo;
 import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
 import co.com.ceiba.parqueadero.testdatabuilder.CarroTestDataBuilder;
+import co.com.ceiba.parqueadero.testdatabuilder.MotoTestDataBuilder;
+
 
 public class VigilanteServiceTest extends VigilanteService {
 
+	
+	@Mock
+	private RegistroVehiculoService registroVehiculoService;
+	
+	@Mock
+	private PrecioService precioService;
+	
+	@InjectMocks
+	private VigilanteService vigilante;
+	
+	@org.junit.Before
+	public void setup() {
+		MockitoAnnotations.initMocks(this);
+		//this.registroVehiculoService = mock(RegistroVehiculoService.class);
+	}
+	
+	
 	@Test
 	public void placaPorA() {
 		// arrange
@@ -93,13 +124,262 @@ public class VigilanteServiceTest extends VigilanteService {
 		}
 	}
 	
-//	@Test
-//	public void inicializarCantidadDeCarros() {
-//		// arrange
-//		VigilanteService vigilante = new VigilanteService();
-//		// act
-//		vigilante.inicializarCantidadDeVehiculosPorTipo(TipoVehiculo.CARRO.getTipo());
-//		// assert
-////		assertNotNull(vigilante.));
-//	}
+	@Test
+	public void inicializar_5_Carros() {
+		// arrange
+		CarroTestDataBuilder carroTestDataBuilder = new CarroTestDataBuilder();
+		List<Vehiculo> vehiculos = carroTestDataBuilder.buildList(5);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		this.vigilante.inicializarCantidadDeVehiculosPorTipo(TipoVehiculo.CARRO.getTipo());
+		// assert
+		Assert.assertEquals(this.vigilante.getParqueadero().getCarros().size(), 5);		
+	}
+	
+	@Test
+	public void inicializar_6_Motos() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder();
+		List<Vehiculo> vehiculos = motoTestDataBuilder.buildList(6);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		this.vigilante.inicializarCantidadDeVehiculosPorTipo(TipoVehiculo.MOTO.getTipo());
+		// assert
+		Assert.assertEquals(this.vigilante.getParqueadero().getMotos().size(), 6);		
+	}
+	
+	@Test
+	public void inicializarTipoNoValidoDeVehiculos() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder();
+		List<Vehiculo> vehiculos = motoTestDataBuilder.buildList(6);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		this.vigilante.inicializarCantidadDeVehiculosPorTipo(3);
+		// assert
+		Assert.assertEquals(this.vigilante.getParqueadero().getMotos().size(), 0);
+		Assert.assertEquals(this.vigilante.getParqueadero().getCarros().size(), 0);
+	}
+	
+	@Test
+	public void inicializarSinMotos() {
+		// arrange
+		List<Vehiculo> vehiculos = null;
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		this.vigilante.inicializarCantidadDeVehiculosPorTipo(TipoVehiculo.MOTO.getTipo());
+		// assert
+		Assert.assertEquals(this.vigilante.getParqueadero().getMotos().size(), 0);
+	}
+	
+	@Test
+	public void siHayDisponibilidadParaCarro() {
+		// arrange
+		CarroTestDataBuilder carroTestDataBuilder = new CarroTestDataBuilder();
+		Vehiculo vehiculo = carroTestDataBuilder.build();
+		List<Vehiculo> vehiculos = carroTestDataBuilder.buildList(19);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		boolean hayDisponibilidadParaVehiculo = this.vigilante.hayDisponibilidadParaVehiculo(vehiculo);
+		// assert
+		assertTrue(hayDisponibilidadParaVehiculo);	
+	}
+	
+	@Test
+	public void noHayDisponibilidadParaCarro() {
+		// arrange
+		CarroTestDataBuilder carroTestDataBuilder = new CarroTestDataBuilder();
+		Vehiculo vehiculo = carroTestDataBuilder.build();
+		List<Vehiculo> vehiculos = carroTestDataBuilder.buildList(20);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		boolean hayDisponibilidadParaVehiculo = this.vigilante.hayDisponibilidadParaVehiculo(vehiculo);
+		// assert
+		assertFalse(hayDisponibilidadParaVehiculo);	
+	}
+	
+	@Test
+	public void siHayDisponibilidadParaMoto() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder();
+		Vehiculo vehiculo = motoTestDataBuilder.build();
+		List<Vehiculo> vehiculos = motoTestDataBuilder.buildList(9);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		boolean hayDisponibilidadParaVehiculo = this.vigilante.hayDisponibilidadParaVehiculo(vehiculo);
+		// assert
+		assertTrue(hayDisponibilidadParaVehiculo);	
+	}
+	
+	@Test
+	public void noHayDisponibilidadParaMoto() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder();
+		Vehiculo vehiculo = motoTestDataBuilder.build();
+		List<Vehiculo> vehiculos = motoTestDataBuilder.buildList(10);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		boolean hayDisponibilidadParaVehiculo = this.vigilante.hayDisponibilidadParaVehiculo(vehiculo);
+		// assert
+		assertFalse(hayDisponibilidadParaVehiculo);	
+	}
+	
+	@Test
+	public void noHayDisponibilidadParaOtroTipoDeVehiculo() {
+		// arrange
+		CarroTestDataBuilder carroTestDataBuilder = new CarroTestDataBuilder();
+		Vehiculo vehiculo = null;
+		List<Vehiculo> vehiculos = carroTestDataBuilder.buildList(10);
+		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
+		// act
+		boolean hayDisponibilidadParaVehiculo = this.vigilante.hayDisponibilidadParaVehiculo(vehiculo);
+		// assert
+		assertFalse(hayDisponibilidadParaVehiculo);	
+	}
+	
+	@Test
+	public void cobrarCostoExtraPorCilindraje() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder().conCilindraje(501);
+		Vehiculo vehiculo = motoTestDataBuilder.build();
+		// act
+		int costoExtraPorCilindraje = this.vigilante.costoExtraPorCilindraje(((Moto) vehiculo).getCilindraje());
+		// assert
+		Assert.assertEquals(costoExtraPorCilindraje, 2000);
+	}
+	
+	@Test
+	public void noCobrarCostoExtraPorCilindraje() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder().conCilindraje(500);
+		Vehiculo vehiculo = motoTestDataBuilder.build();
+		// act
+		int costoExtraPorCilindraje = this.vigilante.costoExtraPorCilindraje(((Moto) vehiculo).getCilindraje());
+		// assert
+		Assert.assertEquals(costoExtraPorCilindraje, 0);
+	}
+	
+	@Test
+	public void calcularTiempoEnElParqueaderoEnHoras() {
+		// arrange
+		LocalDateTime localDateTimeEntrada = LocalDateTime.of(2018, 07, 27, 13, 50);
+		Date fechaEntrada = Date.from(localDateTimeEntrada.atZone(ZoneId.systemDefault()).toInstant());
+		LocalDateTime localDateTimeSalida = LocalDateTime.of(2018, 07, 30, 14, 24);
+		Date fechaSalida = Date.from(localDateTimeSalida.atZone(ZoneId.systemDefault()).toInstant());
+		int cantidadHoras = 1;
+		// act
+		cantidadHoras += this.vigilante.calcularTiempoEnElParqueadero(fechaEntrada.getTime(), fechaSalida.getTime(), VigilanteService.HORA_EN_MILISEGUNDOS);
+		// assert
+		Assert.assertEquals(cantidadHoras, 73);
+	}
+	
+	@Test
+	public void calcularTiempoEnElParqueaderoEnDias() {
+		// arrange
+		LocalDateTime localDateTimeEntrada = LocalDateTime.of(2018, 07, 27, 13, 50);
+		Date fechaEntrada = Date.from(localDateTimeEntrada.atZone(ZoneId.systemDefault()).toInstant());
+		LocalDateTime localDateTimeSalida = LocalDateTime.of(2018, 07, 30, 14, 24);
+		Date fechaSalida = Date.from(localDateTimeSalida.atZone(ZoneId.systemDefault()).toInstant());
+
+		// act
+		int cantidadDias = this.vigilante.calcularTiempoEnElParqueadero(fechaEntrada.getTime(), fechaSalida.getTime(), VigilanteService.DIA_EN_MILISEGUNDOS);
+		// assert
+		Assert.assertEquals(cantidadDias, 3);
+	}
+	
+	@Test
+	public void obtenerValorAPagarCarro() {
+		// arrange
+		CarroTestDataBuilder carroTestDataBuilder = new CarroTestDataBuilder();
+		Vehiculo vehiculo = carroTestDataBuilder.build();
+		LocalDateTime localDateTimeEntrada = LocalDateTime.of(2018, 07, 27, 13, 50);
+		Date fechaEntrada = Date.from(localDateTimeEntrada.atZone(ZoneId.systemDefault()).toInstant());
+		LocalDateTime localDateTimeSalida = LocalDateTime.of(2018, 07, 30, 14, 24);
+		Date fechaSalida = Date.from(localDateTimeSalida.atZone(ZoneId.systemDefault()).toInstant());
+		
+		Precio precioPorHora = new Precio(1, 1, 1, 1000);
+		Precio precioPorDia = new Precio(2, 2, 1, 8000);
+		
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.HORA.getTipo())).thenReturn(precioPorHora);
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.DIA.getTipo())).thenReturn(precioPorDia);
+
+		// act
+		int cantidadAPagar = this.vigilante.obtenerValorAPagar(vehiculo, fechaEntrada.getTime(), fechaSalida.getTime());
+		// assert
+		Assert.assertEquals(cantidadAPagar, 25000);
+	}
+	
+	@Test
+	public void obtenerValorAPagarMotoConCostoPorCilindraje() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder().conCilindraje(501);
+		Vehiculo vehiculo = motoTestDataBuilder.build();
+		LocalDateTime localDateTimeEntrada = LocalDateTime.of(2018, 07, 27, 13, 50);
+		Date fechaEntrada = Date.from(localDateTimeEntrada.atZone(ZoneId.systemDefault()).toInstant());
+		LocalDateTime localDateTimeSalida = LocalDateTime.of(2018, 07, 30, 14, 24);
+		Date fechaSalida = Date.from(localDateTimeSalida.atZone(ZoneId.systemDefault()).toInstant());
+		
+		Precio precioPorHora = new Precio(3, 1, 2, 500);
+		Precio precioPorDia = new Precio(3, 2, 2, 4000);
+		
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.HORA.getTipo())).thenReturn(precioPorHora);
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.DIA.getTipo())).thenReturn(precioPorDia);
+
+		// act
+		int cantidadAPagar = this.vigilante.obtenerValorAPagar(vehiculo, fechaEntrada.getTime(), fechaSalida.getTime());
+		// assert
+		Assert.assertEquals(cantidadAPagar, 14500);
+	}
+	
+	@Test
+	public void obtenerValorAPagarMotoSinCostoPorCilindraje() {
+		// arrange
+		MotoTestDataBuilder motoTestDataBuilder = new MotoTestDataBuilder();
+		Vehiculo vehiculo = motoTestDataBuilder.build();
+		LocalDateTime localDateTimeEntrada = LocalDateTime.of(2018, 07, 27, 13, 50);
+		Date fechaEntrada = Date.from(localDateTimeEntrada.atZone(ZoneId.systemDefault()).toInstant());
+		LocalDateTime localDateTimeSalida = LocalDateTime.of(2018, 07, 30, 22, 24);
+		Date fechaSalida = Date.from(localDateTimeSalida.atZone(ZoneId.systemDefault()).toInstant());
+		
+		Precio precioPorHora = new Precio(3, 1, 2, 500);
+		Precio precioPorDia = new Precio(3, 2, 2, 4000);
+		
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.HORA.getTipo())).thenReturn(precioPorHora);
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.DIA.getTipo())).thenReturn(precioPorDia);
+
+		// act
+		int cantidadAPagar = this.vigilante.obtenerValorAPagar(vehiculo, fechaEntrada.getTime(), fechaSalida.getTime());
+		// assert
+		Assert.assertEquals(cantidadAPagar, 16000);
+	}
+	
+	/*@Test
+	public void createVehiculoFromJsonBien() {
+		// arrange
+		
+		LocalDateTime localDateTimeEntrada = LocalDateTime.of(2018, 07, 27, 13, 50);
+		Date fechaEntrada = Date.from(localDateTimeEntrada.atZone(ZoneId.systemDefault()).toInstant());
+		LocalDateTime localDateTimeSalida = LocalDateTime.of(2018, 07, 30, 22, 24);
+		Date fechaSalida = Date.from(localDateTimeSalida.atZone(ZoneId.systemDefault()).toInstant());
+		
+		Precio precioPorHora = new Precio(3, 1, 2, 500);
+		Precio precioPorDia = new Precio(3, 2, 2, 4000);
+		
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.HORA.getTipo())).thenReturn(precioPorHora);
+		when(this.precioService.obtenerPrecioPorTipoVehiculoYTiempo(vehiculo.getTipo(),
+				TipoTiempo.DIA.getTipo())).thenReturn(precioPorDia);
+
+		// act
+		int cantidadAPagar = this.vigilante.obtenerValorAPagar(vehiculo, fechaEntrada.getTime(), fechaSalida.getTime());
+		// assert
+		Assert.assertEquals(cantidadAPagar, 16000);
+	}*/
+	
 }

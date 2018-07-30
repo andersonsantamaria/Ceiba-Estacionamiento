@@ -21,6 +21,8 @@ import co.com.ceiba.parqueadero.persistencia.repositorio.jpa.RepositorioVehiculo
 
 @Service
 public class RegistroVehiculoService implements RepositorioRegistroVehiculo {
+	
+	
 	@Autowired
 	private RepositorioRegistroVehiculoJPA repositorioRegistroVehiculoJPA;
 	@Autowired

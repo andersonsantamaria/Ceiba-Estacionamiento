@@ -1,6 +1,10 @@
 package co.com.ceiba.parqueadero.testdatabuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import co.com.ceiba.parqueadero.dominio.Moto;
+import co.com.ceiba.parqueadero.dominio.Vehiculo;
 
 public class MotoTestDataBuilder {
 	private static final String PLACA = "ABC-123";
@@ -25,5 +29,15 @@ public class MotoTestDataBuilder {
 
 	public Moto build() {
 		return new Moto(this.placa, this.cilindraje);
+	}
+	
+	public List<Vehiculo> buildList(int cantidadCarros){
+		List<Vehiculo> motos = new ArrayList<>();
+		
+		for(int i = 0; i < cantidadCarros; i++) {
+			motos.add(this.build());
+		}
+		
+		return motos;
 	}
 }

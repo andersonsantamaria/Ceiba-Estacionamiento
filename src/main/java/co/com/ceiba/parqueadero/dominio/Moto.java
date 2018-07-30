@@ -1,7 +1,5 @@
 package co.com.ceiba.parqueadero.dominio;
 
-import java.util.Date;
-
 public class Moto extends Vehiculo{
 	private int  cilindraje;
 
