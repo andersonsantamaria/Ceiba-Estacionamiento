@@ -86,7 +86,7 @@ public class VigilanteService implements RepositorioVigilante {
 			}
 		} catch (NullPointerException e) {
 			LOGGER.info(e.getMessage());
-			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL);
+			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL); // No existen vehiculos en el parqueadero, o ninguno de los arrays se inicializo
 		}
 
 		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
