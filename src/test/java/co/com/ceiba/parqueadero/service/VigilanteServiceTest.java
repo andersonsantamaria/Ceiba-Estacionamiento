@@ -25,6 +25,10 @@ import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
 import co.com.ceiba.parqueadero.dominio.TipoTiempo;
 import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
+import co.com.ceiba.parqueadero.service.PrecioService;
+import co.com.ceiba.parqueadero.service.RegistroVehiculoService;
+import co.com.ceiba.parqueadero.service.VehiculoService;
+import co.com.ceiba.parqueadero.service.VigilanteService;
 import co.com.ceiba.parqueadero.testdatabuilder.CarroTestDataBuilder;
 import co.com.ceiba.parqueadero.testdatabuilder.MotoTestDataBuilder;
 import co.com.ceiba.parqueadero.util.RestResponse;
@@ -32,7 +36,6 @@ import co.com.ceiba.parqueadero.util.RestResponse;
 
 public class VigilanteServiceTest extends VigilanteService {
 
-	
 	@Mock
 	private RegistroVehiculoService registroVehiculoService;
 	

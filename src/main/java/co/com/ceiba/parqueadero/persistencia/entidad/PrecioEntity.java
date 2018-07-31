@@ -26,6 +26,16 @@ public class PrecioEntity {
 	
 	@Column(name= "valor" , nullable = false)
 	private double valor;
+	
+	
+	
+	public PrecioEntity(int id, TipoVehiculoEntity tipoVehiculo, TiempoEntity tiempo, double valor) {
+		super();
+		this.id = id;
+		this.tipoVehiculo = tipoVehiculo;
+		this.tiempo = tiempo;
+		this.valor = valor;
+	}
 
 	public int getId() {
 		return id;
@@ -41,6 +51,22 @@ public class PrecioEntity {
 
 	public double getValor() {
 		return valor;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setTipoVehiculo(TipoVehiculoEntity tipoVehiculo) {
+		this.tipoVehiculo = tipoVehiculo;
+	}
+
+	public void setTiempo(TiempoEntity tiempo) {
+		this.tiempo = tiempo;
+	}
+
+	public void setValor(double valor) {
+		this.valor = valor;
 	}
 	
 }

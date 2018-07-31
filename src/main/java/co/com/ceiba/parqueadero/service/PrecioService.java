@@ -14,9 +14,8 @@ public class PrecioService  implements RepositorioPrecio {
 	private RepositorioPrecioJPA repositorioPrecioJPA;
 
 	@Override
-	public Precio obtenerPrecioPorTipoVehiculoYTiempo(int idTipoVehiculo, int id_tiempo) {
-		PrecioEntity precioEntity = this.repositorioPrecioJPA.obtenerPrecioPorTipoVehiculoYTiempo(idTipoVehiculo, id_tiempo);
-		Precio precio = new Precio(precioEntity.getId(), precioEntity.getTiempo().getId(), precioEntity.getTipoVehiculo().getId(), precioEntity.getValor());
-		return precio;
+	public Precio obtenerPrecioPorTipoVehiculoYTiempo(int idTipoVehiculo, int idTiempo) {
+		PrecioEntity precioEntity = this.repositorioPrecioJPA.obtenerPrecioPorTipoVehiculoYTiempo(idTipoVehiculo, idTiempo);
+		return new Precio(precioEntity.getId(), precioEntity.getTiempo().getId(), precioEntity.getTipoVehiculo().getId(), precioEntity.getValor());
 	}
 }

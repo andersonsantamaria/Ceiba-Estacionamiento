@@ -192,7 +192,6 @@ public class VigilanteService implements RepositorioVigilante {
 						"Este vehiculo se encuentra actualmente en el parquedero.");
 			}
 		} catch (NumberFormatException | NullPointerException e) {
-			e.printStackTrace();
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con el ingreso de este vehiculo." + e);
 		}
@@ -207,10 +206,8 @@ public class VigilanteService implements RepositorioVigilante {
 			Date fechaSalida = new Date();
 			return reportarSalida(fechaSalida, vehiculo);
 		} catch (NumberFormatException | NullPointerException e) {
-			e.printStackTrace();
+			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Ocurrio un error con la salida de este vehiculo " + e);
 		}
-		return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Ocurrio un error con la salida de este vehiculo.");
-
 	}
 
 	@Override
