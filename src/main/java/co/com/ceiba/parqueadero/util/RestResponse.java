@@ -4,6 +4,9 @@ public class RestResponse {
 	private Integer responseCode;
 	private String message;
 	
+	public RestResponse() {
+	}
+	
 	public RestResponse(Integer responseCode) {
 		this.responseCode = responseCode;
 	}

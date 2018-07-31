@@ -3,6 +3,8 @@ package co.com.ceiba.parqueadero.testdatabuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONObject;
+
 import co.com.ceiba.parqueadero.dominio.Carro;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
 
@@ -33,5 +35,29 @@ public class CarroTestDataBuilder {
 		}
 		
 		return carros;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONObject buildJSON() {
+		JSONObject vehiculoJson = new JSONObject();
+		vehiculoJson.put("placa", "MNH-987");
+		vehiculoJson.put("tipo", 1);
+		return vehiculoJson;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONObject buildJSONDefault() {
+		JSONObject vehiculoJson = new JSONObject();
+		vehiculoJson.put("placa", "BDC-123");
+		vehiculoJson.put("tipo", 1);
+		return vehiculoJson;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONObject buildJSONPlacaA() {
+		JSONObject vehiculoJson = new JSONObject();
+		vehiculoJson.put("placa", "ADC-123");
+		vehiculoJson.put("tipo", 1);
+		return vehiculoJson;
 	}
 }

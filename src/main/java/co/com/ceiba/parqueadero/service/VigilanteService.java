@@ -143,14 +143,14 @@ public class VigilanteService implements RepositorioVigilante {
 		return (int) resta / tiempo;
 	}
 
-	private void reportarIngreso(Vehiculo vehiculo) {
+	protected void reportarIngreso(Vehiculo vehiculo) {
 		Date fechaEntrada = new Date();
 		RegistroVehiculo registroDeEntrada = new RegistroVehiculo(fechaEntrada, null, vehiculo);
 		this.vehiculoService.save(vehiculo);
 		this.registroVehiculoService.save(registroDeEntrada);
 	}
 
-	private RestResponse reportarSalida(Date fechaSalida, Vehiculo vehiculo) {
+	protected RestResponse reportarSalida(Date fechaSalida, Vehiculo vehiculo) {
 		RegistroVehiculo registroDeSalida = this.registroVehiculoService.findByVehiculo(vehiculo.getPlaca());
 		if (registroDeSalida != null) {
 			int costo = obtenerValorAPagar(vehiculo, registroDeSalida.getFechaEntrada().getTime(),
@@ -224,14 +224,14 @@ public class VigilanteService implements RepositorioVigilante {
 		if (Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.MOTO.getTipo()) {
 			vehiculo = new Moto(vehiculoJson.get("placa").toString(),
 					Integer.parseInt(vehiculoJson.get("cilindraje").toString()));
-		} else if (Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.CARRO.getTipo()) {
+		} else {
 			vehiculo = new Carro(vehiculoJson.get("placa").toString());
 		}
 
 		return vehiculo;
 	}
 
-	private boolean comprobarSiEsta(Vehiculo vehiculo) {
+	protected boolean comprobarSiEsta(Vehiculo vehiculo) {
 		try {
 			ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
 			for (Vehiculo vehiculoActivo : vehiculosActivos) {
@@ -239,8 +239,8 @@ public class VigilanteService implements RepositorioVigilante {
 					return true;
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (NullPointerException e) {
+			System.out.println(e);
 		}
 		return false;
 	}
