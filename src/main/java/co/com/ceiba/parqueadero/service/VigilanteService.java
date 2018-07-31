@@ -1,14 +1,14 @@
 package co.com.ceiba.parqueadero.service;
 
-import java.rmi.RemoteException;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,8 +26,6 @@ import co.com.ceiba.parqueadero.service.excepcion.VigilanteServiceException;
 import co.com.ceiba.parqueadero.util.RestResponse;
 import co.com.sc.nexura.superfinanciera.action.generic.services.trm.action.TcrmResponse;
 import co.com.sc.nexura.superfinanciera.action.generic.services.trm.test.TCRMTestClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class VigilanteService implements RepositorioVigilante {
@@ -84,7 +82,7 @@ public class VigilanteService implements RepositorioVigilante {
 					motos.add((Moto) vehiculoActivo);
 				}
 			}
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
 			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL); // No existen vehiculos en el parqueadero, o ninguno de los arrays se inicializo
 		}
@@ -200,7 +198,7 @@ public class VigilanteService implements RepositorioVigilante {
 				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 						"Este vehiculo se encuentra actualmente en el parquedero.");
 			}
-		} catch (NumberFormatException | NullPointerException e) {
+		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con el ingreso de este vehiculo." + e);
@@ -215,7 +213,7 @@ public class VigilanteService implements RepositorioVigilante {
 			vehiculo = this.createVehiculoFromJson(vehiculoJson);
 			Date fechaSalida = new Date();
 			return reportarSalida(fechaSalida, vehiculo);
-		} catch (NumberFormatException | NullPointerException e) {
+		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con la salida de este vehiculo " + e);
@@ -248,7 +246,7 @@ public class VigilanteService implements RepositorioVigilante {
 					return true;
 				}
 			}
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
 			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL);
 		}
@@ -263,7 +261,7 @@ public class VigilanteService implements RepositorioVigilante {
 			TcrmResponse tcrmResponse = TCRMTestClient.devolverTRMDelDia();
 			response = "TRM del dia: $" + decimalFormat.format(tcrmResponse.getValue());
 
-		} catch (RemoteException | ParseException e) {
+		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
 			throw new VigilanteServiceException(ERROR_COMUNICACION_CON_WS_TRM);
 		}
