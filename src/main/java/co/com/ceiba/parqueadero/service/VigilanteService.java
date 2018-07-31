@@ -34,9 +34,7 @@ public class VigilanteService implements RepositorioVigilante {
 	protected static final String VALUE_QUERY_FORMAT = "#0.00";
 	protected static final String NO_HAY_VEHICULO_O_ES_NULL = "No hay vehiculos en el parqueadero o el vehiculo que busca es null";
 	protected static final String ERROR_COMUNICACION_CON_WS_TRM = "Hubo un error de comunicacion con el web service de la TRM";
-
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(VigilanteService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VigilanteService.class);
 
 	private Parqueadero parqueadero;
 
@@ -84,7 +82,8 @@ public class VigilanteService implements RepositorioVigilante {
 			}
 		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
-			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL); // No existen vehiculos en el parqueadero, o ninguno de los arrays se inicializo
+			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL); // No existen vehiculos en el parqueadero, o
+																			// ninguno de los arrays se inicializo
 		}
 
 		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
@@ -175,35 +174,37 @@ public class VigilanteService implements RepositorioVigilante {
 					"El vehiculo no esta activo, o no ha ingresado.");
 	}
 
+	protected RestResponse validacionDeReglasDeNegocioYEjecucion(Vehiculo vehiculo) {
+		if (!comprobarSiEsta(vehiculo)) {
+			if (hayDisponibilidadParaVehiculo(vehiculo)) {
+				if (puedeIngresarPorPlaca(vehiculo.getPlaca())) {
+					reportarIngreso(vehiculo);
+					return new RestResponse(HttpStatus.OK.value(),
+							"Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
+				} else {
+					return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
+							"No puede ingresar porque no esta en un dia habil.");
+				}
+			} else {
+				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No hay disponibilidad.");
+			}
+		} else {
+			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
+					"Este vehiculo se encuentra actualmente en el parquedero.");
+		}
+	}
+
 	@Override
 	public RestResponse permitirIngreso(JSONObject vehiculoJson) {
 		try {
 			Vehiculo vehiculo;
 			vehiculo = this.createVehiculoFromJson(vehiculoJson);
-
-			if (!comprobarSiEsta(vehiculo)) {
-				if (hayDisponibilidadParaVehiculo(vehiculo)) {
-					if (puedeIngresarPorPlaca(vehiculo.getPlaca())) {
-						reportarIngreso(vehiculo);
-						return new RestResponse(HttpStatus.OK.value(),
-								"Se ha registrado el ingreso del vehiculo con placa = " + vehiculo.getPlaca());
-					} else {
-						return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
-								"No puede ingresar porque no esta en un dia habil.");
-					}
-				} else {
-					return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "No hay disponibilidad.");
-				}
-			} else {
-				return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
-						"Este vehiculo se encuentra actualmente en el parquedero.");
-			}
+			return validacionDeReglasDeNegocioYEjecucion(vehiculo);
 		} catch (Exception e) {
 			LOGGER.info(e.getMessage());
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con el ingreso de este vehiculo." + e);
 		}
-
 	}
 
 	@Override
