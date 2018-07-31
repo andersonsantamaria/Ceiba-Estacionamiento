@@ -22,6 +22,7 @@ import co.com.ceiba.parqueadero.dominio.TipoTiempo;
 import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
 import co.com.ceiba.parqueadero.dominio.repositorio.RepositorioVigilante;
+import co.com.ceiba.parqueadero.service.excepcion.VigilanteServiceException;
 import co.com.ceiba.parqueadero.util.RestResponse;
 import co.com.sc.nexura.superfinanciera.action.generic.services.trm.action.TcrmResponse;
 import co.com.sc.nexura.superfinanciera.action.generic.services.trm.test.TCRMTestClient;
@@ -31,6 +32,8 @@ public class VigilanteService implements RepositorioVigilante {
 	protected static final int DIA_EN_MILISEGUNDOS = 86400000;
 	protected static final int HORA_EN_MILISEGUNDOS = 3600000;
 	protected static final String VALUE_QUERY_FORMAT = "#0.00";
+	protected static final String NO_HAY_VEHICULO_O_ES_NULL = "No hay vehiculos en el parqueadero o el vehiculo que busca es null";
+	protected static final String ERROR_COMUNICACION_CON_WS_TRM = "Hubo un error de comunicacion con el web service de la TRM";
 
 	private Parqueadero parqueadero;
 
@@ -67,17 +70,17 @@ public class VigilanteService implements RepositorioVigilante {
 		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
 			motos = new ArrayList<>();
 		}
+
 		try {
 			for (Vehiculo vehiculoActivo : vehiculosActivos) {
-				if (vehiculoActivo.getTipo() == tipoVehiculo) {
-					if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
-						carros.add((Carro) vehiculoActivo);
-					} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
-						motos.add((Moto) vehiculoActivo);
-					}
+				if (carros != null) {
+					carros.add((Carro) vehiculoActivo);
+				} else if (motos != null) {
+					motos.add((Moto) vehiculoActivo);
 				}
 			}
 		}catch(NullPointerException e){
+			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL);
 		}
 
 		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
@@ -206,7 +209,8 @@ public class VigilanteService implements RepositorioVigilante {
 			Date fechaSalida = new Date();
 			return reportarSalida(fechaSalida, vehiculo);
 		} catch (NumberFormatException | NullPointerException e) {
-			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Ocurrio un error con la salida de este vehiculo " + e);
+			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
+					"Ocurrio un error con la salida de este vehiculo " + e);
 		}
 	}
 
@@ -215,7 +219,7 @@ public class VigilanteService implements RepositorioVigilante {
 		return this.registroVehiculoService.obtenerVehiculosActivos();
 	}
 
-	protected Vehiculo createVehiculoFromJson(JSONObject vehiculoJson){
+	protected Vehiculo createVehiculoFromJson(JSONObject vehiculoJson) {
 		Vehiculo vehiculo = null;
 
 		if (Integer.parseInt(vehiculoJson.get("tipo").toString()) == TipoVehiculo.MOTO.getTipo()) {
@@ -228,7 +232,7 @@ public class VigilanteService implements RepositorioVigilante {
 		return vehiculo;
 	}
 
-	protected boolean comprobarSiEsta(Vehiculo vehiculo) {
+	protected boolean comprobarSiEsta(Vehiculo vehiculo){
 		try {
 			ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
 			for (Vehiculo vehiculoActivo : vehiculosActivos) {
@@ -237,7 +241,7 @@ public class VigilanteService implements RepositorioVigilante {
 				}
 			}
 		} catch (NullPointerException e) {
-			System.out.println(e);
+			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL);
 		}
 		return false;
 	}
@@ -251,11 +255,11 @@ public class VigilanteService implements RepositorioVigilante {
 			response = "TRM del dia: $" + decimalFormat.format(tcrmResponse.getValue());
 
 		} catch (RemoteException | ParseException e) {
-			e.printStackTrace();
+			throw new VigilanteServiceException(ERROR_COMUNICACION_CON_WS_TRM);
 		}
 		return new RestResponse(HttpStatus.OK.value(), response);
 	}
-	
+
 	public Parqueadero getParqueadero() {
 		return parqueadero;
 	}

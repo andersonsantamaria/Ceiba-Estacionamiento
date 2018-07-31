@@ -2,8 +2,9 @@ package co.com.ceiba.parqueadero.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,10 +26,7 @@ import co.com.ceiba.parqueadero.dominio.RegistroVehiculo;
 import co.com.ceiba.parqueadero.dominio.TipoTiempo;
 import co.com.ceiba.parqueadero.dominio.TipoVehiculo;
 import co.com.ceiba.parqueadero.dominio.Vehiculo;
-import co.com.ceiba.parqueadero.service.PrecioService;
-import co.com.ceiba.parqueadero.service.RegistroVehiculoService;
-import co.com.ceiba.parqueadero.service.VehiculoService;
-import co.com.ceiba.parqueadero.service.VigilanteService;
+import co.com.ceiba.parqueadero.service.excepcion.VigilanteServiceException;
 import co.com.ceiba.parqueadero.testdatabuilder.CarroTestDataBuilder;
 import co.com.ceiba.parqueadero.testdatabuilder.MotoTestDataBuilder;
 import co.com.ceiba.parqueadero.util.RestResponse;
@@ -177,9 +175,14 @@ public class VigilanteServiceTest extends VigilanteService {
 		List<Vehiculo> vehiculos = null;
 		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
 		// act
-		this.vigilante.inicializarCantidadDeVehiculosPorTipo(TipoVehiculo.MOTO.getTipo());
-		// assert
-		Assert.assertEquals(0, this.vigilante.getParqueadero().getMotos().size());
+		try {
+			this.vigilante.inicializarCantidadDeVehiculosPorTipo(TipoVehiculo.MOTO.getTipo());
+			fail();
+			
+		} catch (VigilanteServiceException e) {
+			// assert
+			Assert.assertEquals(VigilanteService.NO_HAY_VEHICULO_O_ES_NULL, e.getMessage());
+		}
 	}
 	
 	@Test
@@ -426,9 +429,14 @@ public class VigilanteServiceTest extends VigilanteService {
 		Vehiculo vehiculo = null;
 		when(this.registroVehiculoService.obtenerVehiculosActivos()).thenReturn(vehiculos);
 		// act
-		boolean comprobarSiEsta = this.vigilante.comprobarSiEsta(vehiculo);
-		// assert
-		Assert.assertEquals(false, comprobarSiEsta);	
+		try {
+			this.vigilante.comprobarSiEsta(vehiculo);
+			fail();
+			
+		} catch (VigilanteServiceException e) {
+			// assert
+			Assert.assertEquals(VigilanteService.NO_HAY_VEHICULO_O_ES_NULL, e.getMessage());
+		}	
 	}
 	
 	@Test

@@ -27,7 +27,9 @@ public class RegistroVehiculoEntity {
 	@Column(name ="valorPagado" , nullable= true )
 	private double valorPagado;
 	
-	public RegistroVehiculoEntity() {}
+	public RegistroVehiculoEntity() {
+		//constructor por defecto
+	}
 
 	public int getId() {
 		return id;

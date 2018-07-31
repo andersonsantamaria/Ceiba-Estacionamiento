@@ -21,7 +21,9 @@ public class VehiculoEntity {
 	@Column(name = "cilindraje" , nullable= true)
 	private int cilindraje;
 	
-	public VehiculoEntity() {}
+	public VehiculoEntity() {
+		//constructor por defecto
+	}
 
 	public String getPlaca() {
 		return placa;
