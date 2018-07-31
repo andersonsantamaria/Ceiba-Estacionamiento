@@ -26,6 +26,8 @@ import co.com.ceiba.parqueadero.service.excepcion.VigilanteServiceException;
 import co.com.ceiba.parqueadero.util.RestResponse;
 import co.com.sc.nexura.superfinanciera.action.generic.services.trm.action.TcrmResponse;
 import co.com.sc.nexura.superfinanciera.action.generic.services.trm.test.TCRMTestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class VigilanteService implements RepositorioVigilante {
@@ -34,6 +36,9 @@ public class VigilanteService implements RepositorioVigilante {
 	protected static final String VALUE_QUERY_FORMAT = "#0.00";
 	protected static final String NO_HAY_VEHICULO_O_ES_NULL = "No hay vehiculos en el parqueadero o el vehiculo que busca es null";
 	protected static final String ERROR_COMUNICACION_CON_WS_TRM = "Hubo un error de comunicacion con el web service de la TRM";
+
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(VigilanteService.class);
 
 	private Parqueadero parqueadero;
 
@@ -64,7 +69,7 @@ public class VigilanteService implements RepositorioVigilante {
 		ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
 		ArrayList<Moto> motos = null;
 		ArrayList<Carro> carros = null;
-		
+
 		if (tipoVehiculo == TipoVehiculo.CARRO.getTipo()) {
 			carros = new ArrayList<>();
 		} else if (tipoVehiculo == TipoVehiculo.MOTO.getTipo()) {
@@ -79,7 +84,8 @@ public class VigilanteService implements RepositorioVigilante {
 					motos.add((Moto) vehiculoActivo);
 				}
 			}
-		}catch(NullPointerException e){
+		} catch (NullPointerException e) {
+			LOGGER.info(e.getMessage());
 			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL);
 		}
 
@@ -195,6 +201,7 @@ public class VigilanteService implements RepositorioVigilante {
 						"Este vehiculo se encuentra actualmente en el parquedero.");
 			}
 		} catch (NumberFormatException | NullPointerException e) {
+			LOGGER.info(e.getMessage());
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con el ingreso de este vehiculo." + e);
 		}
@@ -209,6 +216,7 @@ public class VigilanteService implements RepositorioVigilante {
 			Date fechaSalida = new Date();
 			return reportarSalida(fechaSalida, vehiculo);
 		} catch (NumberFormatException | NullPointerException e) {
+			LOGGER.info(e.getMessage());
 			return new RestResponse(HttpStatus.NOT_ACCEPTABLE.value(),
 					"Ocurrio un error con la salida de este vehiculo " + e);
 		}
@@ -232,7 +240,7 @@ public class VigilanteService implements RepositorioVigilante {
 		return vehiculo;
 	}
 
-	protected boolean comprobarSiEsta(Vehiculo vehiculo){
+	protected boolean comprobarSiEsta(Vehiculo vehiculo) {
 		try {
 			ArrayList<Vehiculo> vehiculosActivos = (ArrayList<Vehiculo>) this.obtenerVehiculosQueEstanEnElParqueadero();
 			for (Vehiculo vehiculoActivo : vehiculosActivos) {
@@ -241,6 +249,7 @@ public class VigilanteService implements RepositorioVigilante {
 				}
 			}
 		} catch (NullPointerException e) {
+			LOGGER.info(e.getMessage());
 			throw new VigilanteServiceException(NO_HAY_VEHICULO_O_ES_NULL);
 		}
 		return false;
@@ -255,6 +264,7 @@ public class VigilanteService implements RepositorioVigilante {
 			response = "TRM del dia: $" + decimalFormat.format(tcrmResponse.getValue());
 
 		} catch (RemoteException | ParseException e) {
+			LOGGER.info(e.getMessage());
 			throw new VigilanteServiceException(ERROR_COMUNICACION_CON_WS_TRM);
 		}
 		return new RestResponse(HttpStatus.OK.value(), response);
